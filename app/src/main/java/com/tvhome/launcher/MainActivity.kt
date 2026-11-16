@@ -616,7 +616,7 @@ class MainActivity : Activity() {
                 PendingIntent.FLAG_UPDATE_CURRENT
             }
             val pi = PendingIntent.getBroadcast(this, 0, intent, flags)
-            s.commit(pi)
+            s.commit(pi.intentSender)
         } catch (e: Exception) {
             try { session?.abandon() } catch (e2: Exception) { }
             runOnUiThread { hideProgress(); toast("Install failed — ${e.javaClass.simpleName}: ${(e.message ?: "").take(90)}") }
