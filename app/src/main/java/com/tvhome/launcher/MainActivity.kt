@@ -3,6 +3,7 @@ package com.tvhome.launcher
 import android.app.Activity
 import android.app.Dialog
 import android.app.DownloadManager
+import android.app.PendingIntent
 import android.content.*
 import android.content.pm.PackageInstaller
 import android.content.pm.ResolveInfo
@@ -488,9 +489,9 @@ class MainActivity : Activity() {
             setPadding(0, u(8f), 0, u(20f))
         })
         val buttons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.END }
-        val cancel = pill("Later", false) { dlg.dismiss() }
+        val cancel = pill("Later", { false }) { dlg.dismiss() }
         buttons.addView(cancel, LinearLayout.LayoutParams(WRAP, WRAP).apply { rightMargin = u(12f) })
-        buttons.addView(pill("Update Now", true) { dlg.dismiss(); downloadAndInstall(latestUrl ?: return@pill) })
+        buttons.addView(pill("Update Now", { true }) { dlg.dismiss(); downloadAndInstall(latestUrl ?: return@pill) })
         panel.addView(buttons, LinearLayout.LayoutParams(MATCH, WRAP))
         dlg.setContentView(panel)
         dlg.window?.apply {
@@ -609,8 +610,12 @@ class MainActivity : Activity() {
             }
             val intent = Intent(ACTION_INSTALL, Uri.parse("package:$packageName"))
             intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, id)
-            val pi = PendingIntent.getBroadcast(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+            val pi = PendingIntent.getBroadcast(this, 0, intent, flags)
             s.commit(pi)
         } catch (e: Exception) {
             try { session?.abandon() } catch (e2: Exception) { }
