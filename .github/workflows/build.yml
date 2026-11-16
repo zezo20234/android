@@ -16,10 +16,12 @@ jobs:
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "8.7"
+          gradle-version: "8.9"
+      - run: rm -f app/src/main/res/values/themes.xml
+      - run: base64 -d app/tvhome.jks.b64 > app/tvhome.jks
       - run: gradle assembleDebug --no-daemon
-      - run: cp app/build/outputs/apk/debug/app-debug.apk tvhome-launcher.apk
+      - run: cp app/build/outputs/apk/debug/app-debug.apk tvhome-vtest.apk
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "build-${{ github.run_number }}" tvhome-launcher.apk --title "TV Home Launcher build ${{ github.run_number }}" --notes "Google TV-like launcher with update and delete UI buttons" --latest
+        run: gh release create "vtest-${{ github.run_number }}" tvhome-vtest.apk --title "TV Home vtest build ${{ github.run_number }}" --notes "iPhone-style UI for Android 6+" --latest
